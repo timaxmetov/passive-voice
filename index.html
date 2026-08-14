@@ -440,7 +440,12 @@ h1 .swap svg{width:70%;fill:none;stroke:#fff;stroke-width:2.4;stroke-linecap:rou
 #voice input[type=range]{width:74px;accent-color:var(--pink)}
 #voice .stop{font-size:16px;width:34px;height:34px;border-radius:10px;background:#f3f3f3;display:grid;place-items:center}
 #voice .stop:hover{background:var(--pink-soft)}
-@media(max-width:520px){#voice .info{display:none}#voice input[type=range]{width:58px}#voice{padding:8px;gap:7px}}
+/* уезжает вниз при скролле вперёд, чтобы не накрывать текст; возвращается при остановке */
+#voice.tuck{transform:translateY(160%);opacity:0;pointer-events:none}
+@media(max-width:520px){
+  #voice .info,#voice input[type=range]{display:none}
+  #voice{padding:8px;gap:7px}
+}
 .speakinline{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:7px;background:var(--pink-soft);
   font-size:11px;vertical-align:middle;margin-left:5px;transition:.2s}
 .speakinline:hover{background:var(--pink);transform:scale(1.12)}
@@ -1096,6 +1101,18 @@ document.getElementById('vToggle').addEventListener('click',()=>{
 });
 document.getElementById('vRate').addEventListener('input',e=>Say.rate=parseFloat(e.target.value));
 document.getElementById('vStop').addEventListener('click',()=>Say.stop());
+
+/* панель озвучки прячется, пока листаешь вниз — иначе она накрывает текст */
+(()=>{
+  const el=document.getElementById('voice'); let last=scrollY, t;
+  addEventListener('scroll',()=>{
+    const y=scrollY;
+    if(y>last+6 && y>200) el.classList.add('tuck');
+    else if(y<last-6) el.classList.remove('tuck');
+    last=y;
+    clearTimeout(t); t=setTimeout(()=>el.classList.remove('tuck'),700);
+  },{passive:true});
+})();
 
 /* делегированные кнопки озвучки */
 document.addEventListener('click',e=>{
